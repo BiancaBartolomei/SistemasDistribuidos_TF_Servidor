@@ -1,9 +1,10 @@
 const express = require('express');
 const app = express();
+
 const bodyParser = require('body-parser');
 const port = 3300; //porta padrão
 const { Pool, Client } = require('pg')
-const connectionString = 'postgresql://postgres:suasenha@localhost:5432/trabalho_sd'
+const connectionString = 'postgresql://postgres:19972015@localhost:5432/trabalho_sd'
 const pool = new Client({
   connectionString: connectionString,
 })
@@ -27,22 +28,11 @@ app.use('/', router); // requisições que chegam na raiz devem ser enviadas par
 
 router.get('/users', (req, response) =>{
   pool.query('SELECT * FROM users', (err, res) => {
-    pool.end()
+    // pool.end()
     response.json(res.rows)
 
   })
   
-})
-
-router.post('/createUser', (req, response) => {
-  const text = 'INSERT INTO public.users(user_id, name, cpf, email, password) VALUES ($1, $2, $3, $4, $5)'
-  const values = [1, 'aaaaa', '122222', 'brian.m.carlson@gmail.com','15454']
-
-  pool.query(text, values, (err, res) => {
-    // pool.end()
-    response.json(res)
-
-  })
 })
 
 router.delete('/deleteUsers/:id', (req, response) =>{
@@ -97,8 +87,39 @@ router.post('/request', (req, response) =>{
  
 })
 
+router.post('/login', (req, response) => {
+  const email = req.body.email
+  const senha = req.body.senha
+  const text = `SELECT * FROM public.users WHERE email ='${email}' and password='${senha}' `
+
+
+  pool.query(text, (err, res) => {
+    console.log(res)
+    response.json(res.rows)
+
+  })
+})
+
+router.post('/createUser', (req, response) => {
+  const nome = req.body.nome
+  const cpf = req.body.cpf
+  const telefone = req.body.telefone
+  const email = req.body.email
+  const senha = req.body.senha
+
+  const text = `INSERT INTO public.users(
+    name, cpf, email, password)
+    VALUES ('${nome}', '${cpf}', '${telefone}', '${email}', '${senha}')`
+  
+  pool.query(text, (err, res) => {
+    response.json(res)
+  })
+})
+
 //inicia o servidor
-app.listen(port);
+app.listen(3300, '192.168.15.14', function() {
+  console.log('Listening to port:  ' + 3300);
+});
 console.log('API funcionando!');
 
 
