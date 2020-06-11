@@ -72,7 +72,7 @@ router.patch('/place/:id', (req, response) =>{
 
 
 router.get('/place/:name', (req, response) =>{
-  pool.query(`SELECT * FROM places WHERE similarity(name, '${req.params.name}') > 0.5`, (err, res) => {
+  pool.query(`SELECT * FROM places WHERE similarity(name, '${req.params.name.replace("_", " ")}') > 0.5`, (err, res) => {
       // pool.end()
       response.json(res.rows)
     })
