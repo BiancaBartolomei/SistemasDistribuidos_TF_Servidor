@@ -1,0 +1,86 @@
+-- Table: public.users
+
+-- DROP TABLE public.users;
+
+CREATE TABLE public.users
+(
+    user_id serial NOT NULL,
+    name character varying COLLATE pg_catalog."default" NOT NULL,
+    cpf character varying COLLATE pg_catalog."default" NOT NULL,
+     telefone character varying COLLATE pg_catalog."default" NOT NULL,
+    email character varying COLLATE pg_catalog."default" NOT NULL,
+    password character varying COLLATE pg_catalog."default" NOT NULL,
+    CONSTRAINT users_pkey PRIMARY KEY (user_id),
+    CONSTRAINT users_cpf_key UNIQUE (cpf)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE public.users
+    OWNER to postgres;
+-- Table: public.requests
+
+-- DROP TABLE public.requests;
+
+CREATE TABLE public.requests
+(
+    place_id serial NOT NULL,
+    user_id integer NOT NULL,
+
+    name character varying COLLATE pg_catalog."default" NOT NULL,
+    cnpj character varying COLLATE pg_catalog."default" NOT NULL,
+    area numeric NOT NULL,
+    max_qnt integer NOT NULL,
+    CONSTRAINT requests_pkey PRIMARY KEY (place_id),
+ CONSTRAINT favourites_user_id_fkey FOREIGN KEY (user_id)
+        REFERENCES public.users (user_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE public.requests
+    OWNER to postgres;
+-- Table: public.places
+
+-- DROP TABLE public.places;
+
+CREATE TABLE public.places
+(
+    place_id serial NOT NULL,
+    name character varying COLLATE pg_catalog."default" NOT NULL,
+    cnpj character varying COLLATE pg_catalog."default" NOT NULL,
+    area numeric NOT NULL,
+    max_qnt integer NOT NULL,
+    CONSTRAINT places_pkey PRIMARY KEY (place_id)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE public.places
+    OWNER to postgres;
+-- Table: public.favourites
+
+-- DROP TABLE public.favourites;
+
+CREATE TABLE public.favourites
+(
+    user_id integer NOT NULL,
+    place_id integer NOT NULL,
+    CONSTRAINT favourites_pkey PRIMARY KEY (user_id, place_id),
+    CONSTRAINT favourites_place_id_fkey FOREIGN KEY (place_id)
+        REFERENCES public.places (place_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT favourites_user_id_fkey FOREIGN KEY (user_id)
+        REFERENCES public.users (user_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE public.favourites
+    OWNER to postgres;
+
