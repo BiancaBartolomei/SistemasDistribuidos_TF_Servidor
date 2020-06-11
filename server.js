@@ -55,6 +55,16 @@ router.delete('/deleteUsers/:id', (req, response) =>{
   
 })
 
+router.post('/createRequest', (req, response) => {
+  const text = 'INSERT INTO public.requests(place_id, user_id, name, cnpj, area, max_qnt) VALUES ($1, $2, $3, $4, $5, $6)'
+  const values = [req.body.placeId, req.body.userId, req.body.name, req.body.cnpj, req.body.area, req.body.maxQnt]
+  console.log(req.body)
+  pool.query(text, values, (err, res) => {
+    response.json(res)
+
+  })
+})
+
 router.patch('/place/:id', (req, response) =>{
   const id = parseInt(req.params.id);
   const name = req.body.name.substring(0,150);
