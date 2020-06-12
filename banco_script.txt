@@ -1,86 +1,49 @@
--- Table: public.users
-
--- DROP TABLE public.users;
-
-CREATE TABLE public.users
+CREATE TABLE users
 (
-    user_id serial NOT NULL,
-    name character varying COLLATE pg_catalog."default" NOT NULL,
-    cpf character varying COLLATE pg_catalog."default" NOT NULL,
-     telefone character varying COLLATE pg_catalog."default" NOT NULL,
-    email character varying COLLATE pg_catalog."default" NOT NULL,
-    password character varying COLLATE pg_catalog."default" NOT NULL,
-    CONSTRAINT users_pkey PRIMARY KEY (user_id),
-    CONSTRAINT users_cpf_key UNIQUE (cpf)
-)
+    user_id serial primary key,
+    name varchar NOT NULL,
+    cpf varchar NOT NULL unique,
+    telefone varchar NOT NULL,
+    email varchar NOT NULL,
+    password varchar NOT NULL
+);
 
-TABLESPACE pg_default;
-
-ALTER TABLE public.users
-    OWNER to postgres;
--- Table: public.requests
-
--- DROP TABLE public.requests;
-
-CREATE TABLE public.requests
+CREATE TABLE requests
 (
-    place_id serial NOT NULL,
+    place_id serial primary key,
     user_id integer NOT NULL,
-
-    name character varying COLLATE pg_catalog."default" NOT NULL,
-    cnpj character varying COLLATE pg_catalog."default" NOT NULL,
+	foreign key(user_id) references users(user_id),
+	name varchar NOT NULL,
+    cnpj varchar NOT NULL unique,
     area numeric NOT NULL,
-    max_qnt integer NOT NULL,
-    CONSTRAINT requests_pkey PRIMARY KEY (place_id),
- CONSTRAINT favourites_user_id_fkey FOREIGN KEY (user_id)
-        REFERENCES public.users (user_id) MATCH SIMPLE
-        ON UPDATE NO ACTION
-        ON DELETE NO ACTION
-)
+	endereco varchar not NULL,
+    max_qnt integer NOT NULL
+);
 
-TABLESPACE pg_default;
-
-ALTER TABLE public.requests
-    OWNER to postgres;
--- Table: public.places
-
--- DROP TABLE public.places;
-
-CREATE TABLE public.places
+CREATE TABLE places
 (
-    place_id serial NOT NULL,
-    name character varying COLLATE pg_catalog."default" NOT NULL,
-    cnpj character varying COLLATE pg_catalog."default" NOT NULL,
+    place_id serial primary key,
+    name varchar NOT NULL,
+    cnpj varchar NOT NULL,
     area numeric NOT NULL,
-    max_qnt integer NOT NULL,
-    CONSTRAINT places_pkey PRIMARY KEY (place_id)
-)
+	endereco varchar not NULL,
+    max_qnt integer NOT NULL
+);
 
-TABLESPACE pg_default;
-
-ALTER TABLE public.places
-    OWNER to postgres;
--- Table: public.favourites
-
--- DROP TABLE public.favourites;
-
-CREATE TABLE public.favourites
+CREATE TABLE favourites
 (
     user_id integer NOT NULL,
     place_id integer NOT NULL,
-    CONSTRAINT favourites_pkey PRIMARY KEY (user_id, place_id),
-    CONSTRAINT favourites_place_id_fkey FOREIGN KEY (place_id)
-        REFERENCES public.places (place_id) MATCH SIMPLE
-        ON UPDATE NO ACTION
-        ON DELETE NO ACTION,
-    CONSTRAINT favourites_user_id_fkey FOREIGN KEY (user_id)
-        REFERENCES public.users (user_id) MATCH SIMPLE
-        ON UPDATE NO ACTION
-        ON DELETE NO ACTION
-)
+	primary key(user_id, place_id),
+	foreign key(user_id) references users(user_id),
+	foreign key(place_id) references places(place_id)
+);
 
-TABLESPACE pg_default;
 
-ALTER TABLE public.favourites
-    OWNER to postgres;
+INSERT INTO public.users(
+	user_id, name, cpf, telefone, email, password)
+	VALUES ('ana', '12345225421', '32143284', 'ana@gmail', '1');
 
+INSERT INTO public.places(
+name, cnpj, area, endereco, max_qnt)
+	VALUES ('Loja', '121545', 50, 'rua c', 10);
