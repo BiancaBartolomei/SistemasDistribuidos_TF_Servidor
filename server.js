@@ -93,10 +93,41 @@ router.get('/place/:name', (req, response) =>{
  
 })
 
+
 router.get('/favourites/:id', (req, response) =>{
 
   // Have to install pg_trgm: CREATE EXTENSION pg_trgm;
   pool.query(`select * from places join favourites on (places.place_id = favourites.place_id) where user_id = '${req.params.id}'`, (err, res) => {
+  // pool.end()
+  response.json(res.rows)
+
+})
+console.log("Get favourites")
+     
+    })
+
+router.get('/allRequests', (req, response) =>{
+  pool.query(`SELECT r.name as name, r.cnpj as cnpj, u.name as username, r.area as area, r.endereco, r.max_qnt 
+  FROM requests r join users u on u.user_id = r.user_id`, (err, res) => {
+      // pool.end()
+      response.json(res.rows)
+    })
+    console.log("Get places")
+ 
+})
+
+router.post('/request', (req, response) =>{
+  const id = parseInt(req.params.id);
+  console.log(req.body.name)
+  const user_id = req.body.user;
+  const name = req.body.name;
+  const cnpj = req.body.cnpj;
+  const area = parseInt(req.body.area);
+  const max_qnt = req.body.max_qnt;
+  console.log(name)
+  
+  pool.query(`INSERT INTO requests VALUES (id=${id}, user_id='${user_id}', name='${name}',cnpj='${cnpj}',area=${area},max_qnt='${max_qnt}')`, (err, res) => {
+
       // pool.end()
       response.json(res.rows)
 
@@ -185,7 +216,9 @@ router.post('/createUser', (req, response) => {
 })
 
 //inicia o servidor
+
 app.listen(port);
+
 console.log('API funcionando!');
 
 
