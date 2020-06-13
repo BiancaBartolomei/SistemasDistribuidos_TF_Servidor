@@ -4,7 +4,7 @@ const app = express();
 const bodyParser = require('body-parser');
 const port = 3300; //porta padrão
 const { Pool, Client } = require('pg')
-const connectionString = 'postgresql://postgres:19972015@localhost:5432/trabalho_sd'
+const connectionString = 'postgresql://postgres:suasenha@localhost:5432/trabalho_sd'
 const pool = new Client({
   connectionString: connectionString,
 })
@@ -46,11 +46,22 @@ router.delete('/deleteUsers/:id', (req, response) =>{
 })
 
 router.post('/createRequest', (req, response) => {
-  const text = 'INSERT INTO public.requests(place_id, user_id, name, cnpj, area, max_qnt) VALUES ($1, $2, $3, $4, $5, $6)'
-  const values = [req.body.placeId, req.body.userId, req.body.name, req.body.cnpj, req.body.area, req.body.maxQnt]
+  const user_id = req.body.userId;
+  const name = req.body.name;
+  const cnpj = req.body.cnpj;
+  const area = parseInt(req.body.area);
+  const endereco = req.body.endereco;
+  const maxQnt = parseInt(req.body.maxQnt);
+
+  const text = `INSERT INTO public.requests (user_id, name, cnpj, area, endereco, max_qnt) 
+                VALUES ('${user_id}', '${name}', '${cnpj}', '${area}', '${endereco}', '${maxQnt}')`
+
   console.log(req.body)
-  pool.query(text, values, (err, res) => {
+  pool.query(text, (err, res) => {
     response.json(res)
+    if(err){
+      console.log(err)
+    }
 
   })
 })
@@ -72,6 +83,8 @@ router.patch('/place/:id', (req, response) =>{
 
 
 router.get('/place/:name', (req, response) =>{
+
+  // Have to install pg_trgm: CREATE EXTENSION pg_trgm;
   pool.query(`SELECT * FROM places WHERE similarity(name, '${req.params.name.replace("_", " ")}') > 0.5`, (err, res) => {
       // pool.end()
       response.json(res.rows)
@@ -80,22 +93,68 @@ router.get('/place/:name', (req, response) =>{
  
 })
 
-router.post('/request', (req, response) =>{
-  const id = parseInt(req.params.id);
-  console.log(req.body.name)
-  const user_id = req.body.user;
-  const name = req.body.name;
-  const cnpj = req.body.cnpj;
-  const area = parseInt(req.body.area);
-  const max_qnt = req.body.max_qnt;
-  console.log(name)
-  
-  pool.query(`INSERT INTO requests VALUES (id=${id}, user_id='${user_id}', name='${name}',cnpj='${cnpj}',area=${area},max_qnt='${max_qnt}')`, (err, res) => {
+router.get('/favourites/:id', (req, response) =>{
+
+  // Have to install pg_trgm: CREATE EXTENSION pg_trgm;
+  pool.query(`select * from places join favourites on (places.place_id = favourites.place_id) where user_id = '${req.params.id}'`, (err, res) => {
       // pool.end()
-      response.json(res)
+      response.json(res.rows)
+
     })
+    console.log("Get favourites")
  
 })
+
+router.get('/favourite/:user_id&:place_id', (req, response) =>{
+  const user_id = req.params.user_id;
+  const place_id = req.params.place_id;
+
+  pool.query(`select * from favourites where ( user_id = '${user_id}' and place_id = '${place_id}')`, (err, res) => {
+      response.json(res.rows)
+      if(err){
+        console.log(err)
+      }
+    })
+
+    console.log("Get favourite")
+ 
+})
+
+router.post('/favourite', (req, response) => {
+  const user_id = req.body.user_id;
+  const place_id = req.body.place_id;
+
+  const text = `INSERT INTO public.favourites (user_id, place_id) 
+                VALUES ('${user_id}', '${place_id}')`
+
+  console.log(req.body)
+  pool.query(text, (err, res) => {
+    response.json(res)
+    if(err){
+      console.log(err)
+    }
+
+  })
+
+  console.log("Post favourite")
+})
+
+
+router.delete('/favourite/:user_id&:place_id', (req, response) =>{
+  const user_id = req.params.user_id;
+  const place_id = req.params.place_id;
+
+  pool.query(`DELETE from favourites where ( user_id = '${user_id}' and place_id = '${place_id}')`, (err, res) => {
+      response.json(res.rows)
+      if(err){
+        console.log(err)
+      }
+    })
+
+    console.log("Delete favourite")
+ 
+})
+
 
 router.post('/login', (req, response) => {
   const email = req.body.email
@@ -104,7 +163,6 @@ router.post('/login', (req, response) => {
 
 
   pool.query(text, (err, res) => {
-    console.log(res)
     response.json(res.rows)
 
   })
@@ -127,9 +185,7 @@ router.post('/createUser', (req, response) => {
 })
 
 //inicia o servidor
-app.listen(3300, '192.168.15.14', function() {
-  console.log('Listening to port:  ' + 3300);
-});
+app.listen(port);
 console.log('API funcionando!');
 
 
