@@ -94,6 +94,31 @@ router.get('/place/:name', (req, response) =>{
 })
 
 
+router.post('/place', (req, response) =>{
+  const lat = req.body.lat;
+  const lon = req.body.lon;
+  const name = req.body.name;
+  const cnpj = req.body.cnpj;
+  const area = parseInt(req.body.area);
+  const max_qnt = req.body.max_qnt;
+
+  console.log(`INSERT INTO places VALUES (name='${name}',cnpj='${cnpj}',area=${area},max_qnt='${max_qnt}', latitude='${lat}', longitude='${lon}')`)
+  
+  pool.query(`INSERT INTO places VALUES (name='${name}',cnpj='${cnpj}',area=${area},max_qnt='${max_qnt}', latitude='${lat}', longitude='${lon}')`, (err, res) => {
+
+      // pool.end()
+      response.json(res)
+
+      if(err){
+        console.log(err)
+      }
+
+    })
+    console.log("Post place")
+ 
+})
+
+
 router.get('/favourites/:id', (req, response) =>{
 
   // Have to install pg_trgm: CREATE EXTENSION pg_trgm;
@@ -107,12 +132,27 @@ console.log("Get favourites")
     })
 
 router.get('/allRequests', (req, response) =>{
-  pool.query(`SELECT r.name as name, r.cnpj as cnpj, u.name as username, r.area as area, r.endereco, r.max_qnt 
+  pool.query(`SELECT r.name as name, r.cnpj as cnpj, u.name as username, u.user_id as user_id, r.area as area, r.endereco, r.max_qnt, r.place_id as place_id
   FROM requests r join users u on u.user_id = r.user_id`, (err, res) => {
       // pool.end()
       response.json(res.rows)
     })
     console.log("Get places")
+ 
+})
+
+router.delete('/request/:user_id&:place_id', (req, response) =>{
+  const user_id = req.params.user_id;
+  const place_id = req.params.place_id;
+
+  pool.query(`DELETE from requests where ( user_id = '${user_id}' and place_id = '${place_id}')`, (err, res) => {
+      response.json(res.rows)
+      if(err){
+        console.log(err)
+      }
+    })
+
+    console.log("Delete request")
  
 })
 
@@ -195,6 +235,7 @@ router.post('/login', (req, response) => {
 
   pool.query(text, (err, res) => {
     response.json(res.rows)
+    console.log("Login")
 
   })
 })
