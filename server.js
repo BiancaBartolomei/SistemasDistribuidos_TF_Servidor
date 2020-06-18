@@ -4,7 +4,7 @@ const app = express();
 const bodyParser = require('body-parser');
 const port = 3300; //porta padrão
 const { Pool, Client } = require('pg')
-const connectionString = 'postgresql://postgres:suasenha@localhost:5432/trabalho_sd'
+const connectionString = 'postgresql://postgres:19972015@localhost:5432/trabalho_sd'
 const pool = new Client({
   connectionString: connectionString,
 })
@@ -166,7 +166,7 @@ router.post('/request', (req, response) =>{
   const max_qnt = req.body.max_qnt;
   console.log(name)
   
-  pool.query(`INSERT INTO requests VALUES (id=${id}, user_id='${user_id}', name='${name}',cnpj='${cnpj}',area=${area},max_qnt='${max_qnt}')`, (err, res) => {
+  pool.query(`INSERT INTO requests VALUES (id=${id}, user_id='${user_id}', name='${name}',cnpj='${cnpj}',area=${area},max_qnt=${max_qnt})`, (err, res) => {
 
       // pool.end()
       response.json(res.rows)
@@ -248,12 +248,27 @@ router.post('/createUser', (req, response) => {
   const senha = req.body.senha
 
   const text = `INSERT INTO public.users(
-    name, cpf, email, password)
-    VALUES ('${nome}', '${cpf}', '${telefone}', '${email}', '${senha}')`
+    name, cpf, email, password, lat, long)
+    VALUES ('${nome}', '${cpf}', '${telefone}', '${email}', '${senha}', None, None)`
   
   pool.query(text, (err, res) => {
     response.json(res)
   })
+})
+
+router.post('/sendLocation', (req, response) => {
+
+  const id = req.body.user_id
+  const lat = req.body.lat
+  const long = req.body.long
+
+  const text = `UPDATE public.users SET lat = ${lat}, long = ${long} WHERE user_id = ${id}`
+  console.log(text);
+  pool.query(text, (err, res) => {
+    response.json(res)
+  })
+
+
 })
 
 //inicia o servidor

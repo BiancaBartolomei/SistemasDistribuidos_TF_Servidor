@@ -5,7 +5,9 @@ CREATE TABLE users
     cpf varchar NOT NULL unique,
     telefone varchar NOT NULL,
     email varchar NOT NULL,
-    password varchar NOT NULL
+    password varchar NOT NULL,
+    lat numeric, 
+    long numeric
 );
 
 CREATE TABLE requests
@@ -27,7 +29,9 @@ CREATE TABLE places
     cnpj varchar NOT NULL,
     area numeric NOT NULL,
 	endereco varchar not NULL,
-    max_qnt integer NOT NULL
+    max_qnt integer NOT NULL,
+    lat numeric NOT NULL, 
+    long numeric NOT NULL
 );
 
 CREATE TABLE favourites
@@ -41,9 +45,9 @@ CREATE TABLE favourites
 
 
 INSERT INTO public.users(
-	user_id, name, cpf, telefone, email, password)
-	VALUES ('ana', '12345225421', '32143284', 'ana@gmail', '1');
+	name, cpf, telefone, email, password, lat, long)
+	VALUES ('ana', '12345225421', '32143284', 'ana@gmail', '1', NULL, NULL);
 
 INSERT INTO public.places(
-name, cnpj, area, endereco, max_qnt)
-	VALUES ('Loja', '121545', 50, 'rua c', 10);
+name, cnpj, area, endereco, max_qnt, lat, long)
+	VALUES ('Loja', '121545', 50, 'rua c', 10, -21.3512, -45.26019);
