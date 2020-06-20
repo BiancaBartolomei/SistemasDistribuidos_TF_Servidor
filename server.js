@@ -1,10 +1,11 @@
 const express = require('express');
 const app = express();
+const geolib = require('geolib');
 
 const bodyParser = require('body-parser');
 const port = 3300; //porta padrão
 const { Pool, Client } = require('pg')
-const connectionString = 'postgresql://postgres:19972015@localhost:5432/trabalho_sd'
+const connectionString = 'postgresql://postgres:suasenha@localhost:5432/trabalho_sd'
 const pool = new Client({
   connectionString: connectionString,
 })
@@ -270,6 +271,73 @@ router.post('/sendLocation', (req, response) => {
 
 
 })
+
+
+router.get('/placeStatus/:placeId', (req, response) => {
+  console.log("Bateu")
+  count = 0
+  placeId = req.params.placeId
+
+  pool.query(`select lat as latitude,long as longitude from users`, (err, res) => {
+    coord_users = res.rows
+
+    pool.query(`select max_qnt, area, lat as latitude, long as longitude from places where place_id = '${placeId}'`, (err, res) => {
+      place_coord = res.rows[0]
+      console.log(place_coord)
+
+      for (i=0; i<coord_users.length; i++){
+        console.log(coord_users[i])
+        if(coord_users[i].latitude !== null && coord_users[i].longitude !== null){
+
+          isInside = geolib.isPointWithinRadius(
+            {latitude: parseFloat(coord_users[i].latitude), longitude: parseFloat(coord_users[i].longitude)},
+            {latitude: parseFloat(place_coord.latitude), longitude: parseFloat(place_coord.longitude)},
+            Math.sqrt(2*parseFloat(place_coord.area))/2
+          )
+
+          if(isInside){
+            count++
+          }
+        }
+      }
+      console.log(count)
+
+      area = parseFloat(place_coord.area)
+      if(area <= 50){
+        porte = 'Pequeno'
+      }
+      else if( area > 50 && area <=100){
+        porte = 'Médio'
+      }
+      else if( area > 100){
+        porte = 'Grande'
+      }
+      console.log('poete: ' + porte)
+
+      rate = parseFloat(count)/parseFloat(place_coord.max_qnt)
+      if (rate <= 0.3)
+        lotacao = 'Vazio'
+  
+      else if (rate > 0.3 && rate <= 0.6)
+        lotacao = 'Moderado'
+
+      else if (rate > 0.6 && rate <= 0.9)
+        lotacao = 'Cheio'
+
+      else if (rate > 0.9)
+        lotacao = 'Lotado'
+
+
+      response.json({
+        lotacao: lotacao,
+        porte: porte,
+        qnt_max: place_coord.max_qnt,
+        
+      })
+    })
+  })
+})
+
 
 //inicia o servidor
 
