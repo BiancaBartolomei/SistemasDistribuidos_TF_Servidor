@@ -67,6 +67,8 @@ router.post('/createRequest', (req, response) => {
   })
 })
 
+
+
 router.patch('/place/:id', (req, response) =>{
   const id = parseInt(req.params.id);
   const name = req.body.name.substring(0,150);
@@ -101,13 +103,13 @@ router.post('/place', (req, response) =>{
   const name = req.body.name;
   const cnpj = req.body.cnpj;
   const area = parseInt(req.body.area);
-  const max_qnt = req.body.max_qnt;
+  const max_qnt = parseInt(req.body.max_qnt);
+  const endereco = req.body.endereco;
 
   console.log(`INSERT INTO places VALUES (name='${name}',cnpj='${cnpj}',area=${area},max_qnt='${max_qnt}', latitude='${lat}', longitude='${lon}')`)
   
-  pool.query(`INSERT INTO places VALUES (name='${name}',cnpj='${cnpj}',area=${area},max_qnt='${max_qnt}', latitude='${lat}', longitude='${lon}')`, (err, res) => {
+  pool.query(`INSERT INTO places (name, cnpj, endereco, area, max_qnt, lat, long)VALUES ('${name}','${cnpj}', '${endereco}', ${area},${max_qnt}, '${lat}', '${lon}')`, (err, res) => {
 
-      // pool.end()
       response.json(res)
 
       if(err){
@@ -122,9 +124,8 @@ router.post('/place', (req, response) =>{
 
 router.get('/favourites/:id', (req, response) =>{
 
-  // Have to install pg_trgm: CREATE EXTENSION pg_trgm;
   pool.query(`select * from places join favourites on (places.place_id = favourites.place_id) where user_id = '${req.params.id}'`, (err, res) => {
-  // pool.end()
+
   response.json(res.rows)
 
 })
@@ -135,7 +136,6 @@ console.log("Get favourites")
 router.get('/allRequests', (req, response) =>{
   pool.query(`SELECT r.name as name, r.cnpj as cnpj, u.name as username, u.user_id as user_id, r.area as area, r.endereco, r.max_qnt, r.place_id as place_id
   FROM requests r join users u on u.user_id = r.user_id`, (err, res) => {
-      // pool.end()
       response.json(res.rows)
     })
     console.log("Get places")
