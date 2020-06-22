@@ -227,7 +227,7 @@ router.post('/createUser', (req, response) => {
   const senha = req.body.senha
 
   const text = `INSERT INTO public.users(
-    name, cpf, email, password)
+    name, cpf, telefone, email, password)
     VALUES ('${nome}', '${cpf}', '${telefone}', '${email}', '${senha}')`
   
   pool.query(text, (err, res) => {
