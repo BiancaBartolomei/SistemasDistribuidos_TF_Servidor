@@ -159,6 +159,12 @@ router.get('/allRequests', (req, response) =>{
 
 })
 
+router.get('/allPlaces', (req, response) =>{
+  pool.query(`SELECT place_id, name, cnpj, area, endereco, max_qnt, lat, long FROM places`, (err, res) => {
+      response.json(res.rows)
+    })
+})
+
 router.delete('/request/:user_id&:place_id', (req, response) =>{
   const user_id = req.params.user_id;
   const place_id = req.params.place_id;
