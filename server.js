@@ -5,7 +5,7 @@ const geolib = require('geolib');
 const bodyParser = require('body-parser');
 const port = 3300; //porta padrão
 const { Pool, Client } = require('pg')
-const connectionString = 'postgresql://postgres:19972015@localhost:5432/trabalho_sd'
+const connectionString = 'postgresql://postgres:suasenha@localhost:5432/trabalho_sd'
 const pool = new Client({
   connectionString: connectionString,
 })
@@ -48,7 +48,7 @@ router.delete('/deleteUsers/:id', (req, response) =>{
 
 router.post('/createRequest', (req, response) => {
   const user_id = req.body.userId;
-  const name = req.body.name;
+  const name = req.body.nome;
   const cnpj = req.body.cnpj;
   const area = parseInt(req.body.area);
   const endereco = req.body.endereco;
@@ -87,13 +87,17 @@ router.post('/editProfile', (req, response) => {
 })
 
 router.patch('/place/:id', (req, response) =>{
-  const id = parseInt(req.params.id);
-  const name = req.body.name.substring(0,150);
-  const cnpj = req.body.cnpj.substring(0,11);
-  const area = parseInt(req.body.area.substring(0,50));
-  const max_qnt = req.body.max_qnt.substring(0,50);
+  const id = req.params.id
+  const name = req.body.name;
+  const cnpj = req.body.cnpj;
+  const area = parseInt(req.body.area);
+  const max_qnt = parseInt(req.body.max_qnt);
+  const lat = req.body.lat;
+  const long = req.body.long;
+  const endereco = req.body.endereco
 
-  pool.query(`UPDATE places SET name='${name}',cnpj='${cnpj}',area=${area},max_qnt='${max_qnt}' WHERE id=${id}`, (err, res) => {
+console.log(`UPDATE places SET name='${name}',cnpj='${cnpj}',area=${area},max_qnt='${max_qnt}', lat='${lat}', long='${long}', endereco='${endereco}' WHERE place_id=${id}`)
+  pool.query(`UPDATE places SET name='${name}',cnpj='${cnpj}',area=${area},max_qnt='${max_qnt}', lat='${lat}', long='${long}', endereco='${endereco}' WHERE place_id=${id}`, (err, res) => {
       // pool.end()
       response.json(res)
       console.log(res)
@@ -143,7 +147,10 @@ router.get('/favourites/:id', (req, response) =>{
 
   pool.query(`select * from places join favourites on (places.place_id = favourites.place_id) where user_id = '${req.params.id}'`, (err, res) => {
 
-  response.json(res.rows)
+    if(res.rows){
+      response.json(res.rows)
+    }
+  
 
 })
 console.log("Get favourites")
@@ -159,6 +166,12 @@ router.get('/allRequests', (req, response) =>{
 
 })
 
+router.get('/allPlaces', (req, response) =>{
+  pool.query(`SELECT place_id, name, cnpj, area, endereco, max_qnt, lat, long FROM places`, (err, res) => {
+      response.json(res.rows)
+    })
+})
+
 router.delete('/request/:user_id&:place_id', (req, response) =>{
   const user_id = req.params.user_id;
   const place_id = req.params.place_id;
@@ -171,6 +184,20 @@ router.delete('/request/:user_id&:place_id', (req, response) =>{
     })
 
     console.log("Delete request")
+
+})
+
+router.delete('/place/:place_id', (req, response) =>{
+  const place_id = req.params.place_id;
+
+  pool.query(`DELETE from places where ( place_id = '${place_id}')`, (err, res) => {
+      response.json(res)
+      if(err){
+        console.log(err)
+      }
+    })
+
+    console.log("Delete place")
 
 })
 
