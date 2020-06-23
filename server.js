@@ -5,7 +5,7 @@ const geolib = require('geolib');
 const bodyParser = require('body-parser');
 const port = 3300; //porta padrão
 const { Pool, Client } = require('pg')
-const connectionString = 'postgresql://postgres:19972015@localhost:5432/trabalho_sd'
+const connectionString = 'postgresql://postgres:suasenha@localhost:5432/trabalho_sd'
 const pool = new Client({
   connectionString: connectionString,
 })
@@ -48,7 +48,7 @@ router.delete('/deleteUsers/:id', (req, response) =>{
 
 router.post('/createRequest', (req, response) => {
   const user_id = req.body.userId;
-  const name = req.body.name;
+  const name = req.body.nome;
   const cnpj = req.body.cnpj;
   const area = parseInt(req.body.area);
   const endereco = req.body.endereco;
