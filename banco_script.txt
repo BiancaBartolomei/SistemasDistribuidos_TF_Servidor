@@ -40,7 +40,7 @@ CREATE TABLE favourites
     place_id integer NOT NULL,
 	primary key(user_id, place_id),
 	foreign key(user_id) references users(user_id),
-	foreign key(place_id) references places(place_id)
+	foreign key(place_id) references places(place_id) ON DELETE CASCADE
 );
 
 
